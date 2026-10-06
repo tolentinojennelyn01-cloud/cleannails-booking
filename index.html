@@ -140,8 +140,13 @@ const CONFIG = {
   offDays: {},                                         // saved in availability.json (set from the ?owner view)
   booked: {}
 };
-/* Optional: your own Firebase web app config so every device sees changes live. Leave empty to use availability.json. */
-const FIREBASE = { apiKey: "", authDomain: "", projectId: "", appId: "" };
+/* Optional: your own Firebase web app config so every device sees changes live. Filled in for the clean-nails project. */
+const FIREBASE = {
+  apiKey: "AIzaSyC7YQmRqpNrQdGJKy9yfRiM-tYUwpXJYsY",
+  authDomain: "clean-nails.firebaseapp.com",
+  projectId: "clean-nails",
+  appId: "1:414024789576:web:db22cc799104a98c11727d"
+};
 /* ======================================== */
 
 const $=id=>document.getElementById(id), pad=n=>String(n).padStart(2,"0");

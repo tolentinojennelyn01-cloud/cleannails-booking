@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffeaf3">
+<title>CLEAN NAILS by Cean Javier | Book an appointment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Figtree:ital,wght@0,400;0,500;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fff;--mist:#ffeaf3;--ink:#26143a;--mint:#ff9fc8;--mint-d:#d6277f;--red:#8a7381;--line:#f2cadc;--mute:#86647a;
+--display:'Unbounded','Arial Black',sans-serif;--body:'Figtree','Helvetica Neue',Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);color:var(--ink);background:radial-gradient(34rem 22rem at 100% 0,rgba(255,159,200,.55),transparent 65%),radial-gradient(30rem 20rem at 0 100%,rgba(255,159,200,.4),transparent 65%),var(--mist);line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding:44px 18px 72px}
+header{margin-bottom:30px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,13.5vw,4.7rem);line-height:.92;letter-spacing:-.04em}
+h1 span{display:block;color:var(--mint-d)}
+.by{font-style:italic;font-weight:500;font-size:1.1rem;color:var(--mute);margin-top:14px;padding-bottom:16px;border-bottom:2px solid var(--ink)}
+.by b{color:var(--ink);font-weight:700}
+h2{font-family:var(--display);font-weight:600;font-size:1.05rem;letter-spacing:-.02em}
+section{background:var(--paper);border:2px solid var(--ink);border-radius:10px;padding:22px 18px;margin-bottom:22px;box-shadow:6px 6px 0 var(--mint)}
+section[hidden]{display:none}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.mhead h2{flex:1;text-align:left;font-size:1.25rem}
+.nav{all:unset;cursor:pointer;width:40px;height:40px;border:2px solid var(--ink);border-radius:8px;display:grid;place-items:center;font-size:1.2rem;padding-bottom:2px;transition:background .15s}
+.nav:hover:not(:disabled){background:var(--mint)}
+.nav:disabled{opacity:.25;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dow{font-size:.78rem;font-weight:700;color:var(--mute);text-align:center;padding-bottom:2px}
+.day{all:unset;cursor:pointer;box-sizing:border-box;min-height:62px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:.98rem;transition:border-color .15s,transform .15s}
+.day:hover:not(:disabled){border-color:var(--ink);transform:translateY(-2px)}
+.day:disabled{opacity:.3;cursor:default;background:transparent}
+.dots{display:grid;grid-template-columns:repeat(4,5px);gap:3px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--mint-d)}
+.dots i.x{background:transparent;box-shadow:inset 0 0 0 1.5px var(--red)}
+.day.off{background:repeating-linear-gradient(135deg,var(--mist) 0 5px,#fff 5px 10px);color:var(--mute);font-weight:500}
+.day.full{background:#f4e6ec;color:var(--red)}
+.day.today{border-color:var(--mint-d);border-width:2px}
+.day.sel{background:var(--ink);border-color:var(--ink);color:#fff}
+.day.sel .dots i{background:var(--mint)}.day.sel .dots i.x{background:transparent;box-shadow:inset 0 0 0 1.5px #e7c3d4}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:18px;font-size:.84rem;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:9px;height:9px;border-radius:50%;background:var(--mint-d)}
+.legend i.x{background:transparent;box-shadow:inset 0 0 0 2px var(--red)}
+.legend i.o{width:14px;height:14px;border-radius:3px;background:repeating-linear-gradient(135deg,var(--line) 0 2px,#fff 2px 4px);box-shadow:0 0 0 1px var(--line)}
+#dTitle{font-size:1.2rem;margin-bottom:6px}
+.msg{font-size:.96rem;margin-bottom:16px}.msg.off{background:var(--mist);border-left:4px solid var(--ink);padding:12px 14px;border-radius:0 8px 8px 0}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
+.slot{all:unset;box-sizing:border-box;text-align:center;padding:12px 6px;border-radius:999px;border:2px solid var(--ink);font-weight:700;font-size:.95rem}
+button.slot{cursor:pointer;transition:background .15s}
+button.slot:hover{background:var(--mint)}
+.slot.x{border-color:var(--line);color:#a58a9a;text-decoration:line-through;background:var(--mist);font-weight:500}
+button.slot.x:hover{background:var(--mist);border-color:var(--ink)}
+.cta{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;text-align:center;margin-top:16px;padding:15px;border-radius:8px;background:var(--ink);color:#fff;font-weight:700;font-size:1rem;transition:background .15s,color .15s}
+.cta:hover{background:var(--mint);color:var(--ink)}
+.cta.alt{background:transparent;color:var(--ink);border:2px solid var(--ink);margin-top:10px}
+.cta.alt:hover{background:var(--mint)}
+.info p{font-size:.95rem}.info p+p{margin-top:8px}.info h2{margin-bottom:10px}
+label{display:block;font-size:.88rem;font-weight:700;margin:14px 0 6px}
+input,textarea{width:100%;font:inherit;padding:12px 14px;border-radius:8px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+input:focus-visible,textarea:focus-visible{outline:none;border-color:var(--ink)}
+textarea{min-height:110px;font:12px monospace}
+.err{color:#c0173f;font-size:.9rem;min-height:1.2em;margin-top:6px}
+.hint{font-size:.9rem;color:var(--mute);margin:6px 0 10px}
+.edit{margin-top:18px;padding-top:6px;border-top:2px dashed var(--line)}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--mint-d);outline-offset:2px}
+@media(max-width:480px){.wrap{padding:34px 12px 56px}section{padding:20px 12px}.grid{gap:4px}.day{min-height:56px;font-size:.9rem}.dots{grid-template-columns:repeat(4,4px);gap:2px}.dots i{width:4px;height:4px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>CLEAN<span>NAILS</span></h1>
+    <p class="by">by <b>Cean Javier</b> &#9825; Pick a date to see open times.</p>
+  </header>
+
+  <section id="cal-card">
+    <div class="mhead">
+      <button class="nav" id="prev" aria-label="Previous month">&lsaquo;</button>
+      <h2 id="month"></h2>
+      <button class="nav" id="next" aria-label="Next month">&rsaquo;</button>
+    </div>
+    <div class="grid" id="cal"></div>
+    <p class="legend"><span><i></i>Open time</span><span><i class="x"></i>Taken</span><span><i class="o"></i>Closed</span></p>
+  </section>
+
+  <!-- Day details: clients see times, owner can edit (open the site with ?owner at the end of the address) -->
+  <section id="day" hidden>
+    <h2 id="dTitle"></h2>
+    <p class="msg" id="dMsg"></p>
+    <div class="slots" id="slots"></div>
+    <a class="cta" id="dm" target="_blank" rel="noopener">Message Cean to book</a>
+    <div class="edit" id="ownerBox" hidden>
+      <label for="eNote">Reason shown to clients (optional)</label>
+      <input id="eNote" placeholder="Out of town, day off, family event">
+      <button class="cta" id="eOff">Mark day as closed</button>
+      <button class="cta alt" id="eOn" hidden>Open this day again</button>
+      <p class="hint">Tap a time above to mark it taken. Tap again to undo.</p>
+    </div>
+  </section>
+
+  <section class="info">
+    <h2>How to book</h2>
+    <p>Appointments are 3 hours apart.</p>
+    <p>Message Cean on Instagram with your preferred date and time. Your slot is confirmed once Cean replies.</p>
+    <button class="cta alt" id="saveCal">Save calendar as picture</button>
+  </section>
+
+  <section id="owner" hidden>
+    <h2>Owner tools</h2>
+    <div id="login" hidden>
+      <label for="lEmail">Owner email</label><input id="lEmail" type="email" autocomplete="username">
+      <label for="lPass">Password</label><input id="lPass" type="password" autocomplete="current-password">
+      <button class="cta" id="lGo">Sign in</button><div class="err" id="lErr" role="alert"></div>
+    </div>
+    <div id="copyBox">
+      <p class="hint">Changes save on this device. To show them to clients: tap Copy schedule, open availability.json in your GitHub repo, paste to replace everything, then Commit.</p>
+      <textarea id="json" readonly></textarea>
+      <button class="cta alt" id="copyJson">Copy schedule</button>
+    </div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ============ EDIT THIS PART ============ */
+const CONFIG = {
+  studio: "CLEAN NAILS",
+  owner: "Cean Javier",
+  instagram: "cleannails",                            // Cean's Instagram username, no @
+  site: "https://YOUR-USERNAME.github.io/cleannails/", // printed on the saved calendar picture
+  closedDays: [],                                      // weekly days off: 0 = Sunday ... 6 = Saturday
+  hours: ["8:00 AM","11:00 AM","2:00 PM","5:00 PM"],   // 3 hours apart; edit to change times
+  daysAhead: 90,
+  offDays: {},                                         // saved in availability.json (set from the ?owner view)
+  booked: {}
+};
+/* Optional: your own Firebase web app config so every device sees changes live. Leave empty to use availability.json. */
+const FIREBASE = { apiKey: "", authDomain: "", projectId: "", appId: "" };
+/* ======================================== */
+
+const $=id=>document.getElementById(id), pad=n=>String(n).padStart(2,"0");
+const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const mf=(d,o)=>d.toLocaleDateString("en",o), MONTH={month:"long",year:"numeric"};
+const today=new Date(); today.setHours(0,0,0,0);
+const last=new Date(today); last.setDate(last.getDate()+CONFIG.daysAhead);
+let view=new Date(today.getFullYear(),today.getMonth(),1), date=null;
+const OWNER=new URLSearchParams(location.search).has("owner");
+const SYNC=!!FIREBASE.apiKey&&typeof firebase!=="undefined"; let DB=null,AUTH=null,SIGNED=!SYNC;
+const bk=dt=>CONFIG.booked[key(dt)]||[];
+const offNote=dt=>CONFIG.offDays[key(dt)]||(CONFIG.closedDays.includes(dt.getDay())?"Cean isn't taking bookings on this day.":null);
+const openSlots=dt=>CONFIG.hours.filter(h=>!bk(dt).includes(h));
+const shortT=h=>h.replace(/:00 ([AP])M/,"$1");
+$("dm").href="https://ig.me/m/"+CONFIG.instagram;
+if(OWNER){$("owner").hidden=false;$("copyBox").hidden=SYNC}
+
+function drawCal(){
+  const g=$("cal"); g.innerHTML="";
+  "SMTWTFS".split("").forEach(d=>g.insertAdjacentHTML("beforeend",`<div class="dow">${d}</div>`));
+  $("month").textContent=mf(view,MONTH);
+  $("prev").disabled=view<=new Date(today.getFullYear(),today.getMonth(),1);
+  $("next").disabled=new Date(view.getFullYear(),view.getMonth()+1,1)>last;
+  for(let i=0;i<view.getDay();i++)g.append(document.createElement("div"));
+  const n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  for(let d=1;d<=n;d++){
+    const dt=new Date(view.getFullYear(),view.getMonth(),d), b=document.createElement("button"), gone=dt<today||dt>last;
+    const off=offNote(dt), full=!off&&!openSlots(dt).length;
+    b.className="day"+(off?" off":full?" full":"")+(+dt===+today?" today":"")+(date&&+dt===+date?" sel":"");
+    b.disabled=gone; b.setAttribute("aria-label",dt.toDateString());
+    b.innerHTML=`<span>${d}</span>`+(gone||off?"":`<span class="dots">${CONFIG.hours.map(h=>`<i${bk(dt).includes(h)?' class="x"':''}></i>`).join("")}</span>`);
+    b.onclick=()=>{date=dt;drawCal();drawDay();$("day").scrollIntoView({behavior:"smooth",block:"nearest"})};
+    g.append(b);
+  }
+}
+function drawDay(){
+  if(!date)return;
+  const k=key(date), off=offNote(date), isOff=CONFIG.offDays[k]!==undefined, edit=OWNER&&SIGNED;
+  $("day").hidden=false; $("dTitle").textContent=mf(date,{weekday:"long",month:"long",day:"numeric"});
+  $("dMsg").textContent=off||(openSlots(date).length?"Open times are outlined. Message Cean with the one you want.":"Fully booked on this day. Try another date.");
+  $("dMsg").className="msg"+(off?" off":"");
+  const w=$("slots"); w.innerHTML="";
+  if(!off||edit)CONFIG.hours.forEach(h=>{
+    const taken=bk(date).includes(h), b=document.createElement(edit?"button":"span");
+    b.className="slot"+(taken?" x":""); b.textContent=h;
+    if(edit){b.setAttribute("aria-pressed",taken);b.onclick=()=>{const a=CONFIG.booked[k]=CONFIG.booked[k]||[],i=a.indexOf(h);i<0?a.push(h):a.splice(i,1);saveEdit()}}
+    w.append(b)});
+  $("dm").hidden=edit||!!off||!openSlots(date).length;
+  $("ownerBox").hidden=!edit;
+  $("eNote").value=isOff?CONFIG.offDays[k]:""; $("eOff").textContent=isOff?"Update note":"Mark day as closed"; $("eOn").hidden=!isOff;
+}
+function saveEdit(){
+  Object.keys(CONFIG.booked).forEach(k=>{if(!CONFIG.booked[k].length)delete CONFIG.booked[k]});
+  const data={offDays:CONFIG.offDays,booked:CONFIG.booked}; $("json").value=JSON.stringify(data,null,2);
+  if(SYNC)DB.collection("schedule").doc("main").set(data).catch(()=>alert("Could not save. Please sign in again."));
+  else try{localStorage.setItem("cn-schedule",$("json").value)}catch(e){}
+  drawCal(); drawDay();
+}
+$("eOff").onclick=()=>{CONFIG.offDays[key(date)]=$("eNote").value.trim()||"Cean isn't available on this day.";saveEdit()};
+$("eOn").onclick=()=>{delete CONFIG.offDays[key(date)];saveEdit()};
+$("prev").onclick=()=>{view.setMonth(view.getMonth()-1);drawCal()};
+$("next").onclick=()=>{view.setMonth(view.getMonth()+1);drawCal()};
+$("copyJson").onclick=async()=>{$("json").select();try{await navigator.clipboard.writeText($("json").value);$("copyJson").textContent="Copied"}catch(e){document.execCommand("copy")}};
+
+/* ---------- Save the month as a picture ---------- */
+$("saveCal").onclick=async()=>{
+  await document.fonts.ready;
+  const n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(), first=new Date(view.getFullYear(),view.getMonth(),1).getDay(), rows=Math.ceil((first+n)/7);
+  const W=1400,cw=170,m=105,top=330,rh=Math.max(150,100+Math.ceil(CONFIG.hours.length/2)*32),H=top+rows*rh+300;
+  const c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d"), F="Figtree,Arial,sans-serif";
+  x.fillStyle="#ffeaf3"; x.fillRect(0,0,W,H); x.fillStyle="#ff9fc8"; x.fillRect(0,0,W,22);
+  x.textAlign="left"; x.fillStyle="#26143a"; x.font="800 84px Unbounded,'Arial Black',sans-serif"; x.fillText(CONFIG.studio,m,160);
+  x.fillStyle="#d6277f"; x.font="italic 500 44px "+F; x.fillText("by "+CONFIG.owner+"  |  "+mf(view,MONTH),m,230);
+  x.textAlign="center"; x.fillStyle="#86647a"; x.font="700 24px "+F;
+  "SMTWTFS".split("").forEach((d,i)=>x.fillText(d,m+i*cw+cw/2,top-20));
+  x.textAlign="left";
+  for(let d=1;d<=n;d++){
+    const dt=new Date(view.getFullYear(),view.getMonth(),d), i=first+d-1, cx=m+(i%7)*cw, cy=top+Math.floor(i/7)*rh;
+    const gone=dt<today||dt>last, off=!gone&&(offNote(dt)||!openSlots(dt).length), b=bk(dt);
+    x.beginPath(); x.roundRect(cx+4,cy+4,cw-8,rh-8,12);
+    if(gone){x.strokeStyle="#f2cadc";x.lineWidth=2;x.stroke()}
+    else if(off){x.fillStyle="#f3d3e2";x.fill()}
+    else{x.fillStyle="#fff";x.fill();x.strokeStyle=b.length?"#d6277f":"#f2cadc";x.lineWidth=b.length?4:2;x.stroke()}
+    x.fillStyle=gone?"#c7a9b9":"#26143a"; x.font="800 30px "+F; x.fillText(d,cx+18,cy+44);
+    if(!gone&&!off)CONFIG.hours.forEach((h,k)=>{const t=shortT(h),tx=cx+18+(k%2)*66,ty=cy+90+Math.floor(k/2)*32; x.font="700 23px "+F;
+      if(b.includes(h)){x.fillStyle="#8a7381";x.fillText(t,tx,ty);x.fillRect(tx,ty-8,x.measureText(t).width,3)}
+      else{x.fillStyle="#26143a";x.fillText(t,tx,ty)}});
+  }
+  const ly=top+rows*rh+70; x.fillStyle="#86647a"; x.font="500 26px "+F;
+  x.fillText("Crossed-out times are taken. Shaded days are closed or fully booked.",m,ly);
+  x.fillStyle="#26143a"; x.fillText("Appointments are 3 hours apart. Message "+CONFIG.owner.split(" ")[0]+" on Instagram to book.",m,ly+44);
+  x.font="700 30px "+F; x.fillText("Book here: "+CONFIG.site.replace(/^https?:\/\//,"").replace(/\/$/,""),m,ly+112);
+  x.fillStyle="#d6277f"; x.fillText("@"+CONFIG.instagram,m,ly+156);
+  const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download="clean-nails-"+mf(view,MONTH).replace(" ","-")+".png"; a.click();
+};
+
+/* ---------- Load schedule ---------- */
+function loadLocal(){
+  let saved=null; try{saved=JSON.parse(localStorage.getItem("cn-schedule"))}catch(e){}
+  (saved?Promise.resolve(saved):fetch("availability.json?"+Date.now()).then(r=>r.json())).then(d=>{CONFIG.offDays=d.offDays||{};CONFIG.booked=d.booked||{}})
+    .catch(()=>{}).finally(()=>{drawCal();$("json").value=JSON.stringify({offDays:CONFIG.offDays,booked:CONFIG.booked},null,2)});
+}
+if(SYNC){
+  firebase.initializeApp(FIREBASE); DB=firebase.firestore(); AUTH=firebase.auth();
+  DB.collection("schedule").doc("main").onSnapshot(s=>{const d=s.exists?s.data():{};CONFIG.offDays=d.offDays||{};CONFIG.booked=d.booked||{};drawCal();drawDay()},()=>drawCal());
+  AUTH.onAuthStateChanged(u=>{SIGNED=!!u;$("login").hidden=SIGNED||!OWNER;drawDay()});
+  $("lGo").onclick=()=>{$("lErr").textContent="";AUTH.signInWithEmailAndPassword($("lEmail").value.trim(),$("lPass").value).catch(()=>{$("lErr").textContent="Wrong email or password."})};
+  drawCal();
+}else loadLocal();
+</script>
+</body>
+</html>

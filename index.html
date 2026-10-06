@@ -212,9 +212,9 @@ $("next").onclick=()=>{view.setMonth(view.getMonth()+1);drawCal()};
 
 /* ---------- Save as picture (Story, Post, full month) ---------- */
 const PIC={
-  cal:{W:1400,cw:170,m:105,top:330,ty:160,ts:84,sub:44,nf:30,tf:23,f:26,foot:300,rh:()=>Math.max(150,100+Math.ceil(CONFIG.hours.length/2)*32)},
-  story:{W:1080,H:1920,cw:140,m:50,top:430,ty:230,ts:96,sub:40,nf:28,tf:21,f:24,foot:330,max:230},
-  post:{W:1080,H:1350,cw:140,m:50,top:310,ty:150,ts:80,sub:36,nf:28,tf:21,f:24,foot:230,max:200}
+  cal:{W:1400,cw:170,m:105,top:330,ty:160,ts:84,sub:44,nf:30,tf:23,f:26,foot:70,rh:()=>Math.max(150,100+Math.ceil(CONFIG.hours.length/2)*32)},
+  story:{W:1080,H:1920,cw:140,m:50,top:430,ty:230,ts:96,sub:40,nf:28,tf:21,f:24,foot:200,max:230},
+  post:{W:1080,H:1350,cw:140,m:50,top:310,ty:150,ts:80,sub:36,nf:28,tf:21,f:24,foot:60,max:200}
 };
 async function savePic(kind){
   await document.fonts.ready;
@@ -239,11 +239,6 @@ async function savePic(kind){
       if(b.includes(h)){x.fillStyle="#8a7381";x.fillText(t,tx,ty);x.fillRect(tx,ty-8,x.measureText(t).width,3)}
       else{x.fillStyle="#26143a";x.fillText(t,tx,ty)}});
   }
-  const ly=H-P.foot+60; x.fillStyle="#86647a"; x.font=`500 ${P.f}px ${F}`;
-  x.fillText("Crossed-out times are taken. Shaded days are closed or fully booked.",m,ly);
-  x.fillStyle="#26143a"; x.fillText("Appointments are 3 hours apart. Message "+CONFIG.owner.split(" ")[0]+" on Instagram to book.",m,ly+40);
-  x.font=`700 ${P.f+4}px ${F}`; x.fillText("Book here: "+CONFIG.site.replace(/^https?:\/\//,"").replace(/\/$/,""),m,ly+100);
-  x.fillStyle="#d6277f"; x.fillText("@"+CONFIG.instagram,m,ly+144);
   const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download=`clean-nails-${kind}-${mf(view,MONTH).replace(" ","-")}.png`; a.click();
 }
 document.querySelectorAll("[data-pic]").forEach(b=>b.onclick=()=>savePic(b.dataset.pic));

@@ -120,7 +120,7 @@ textarea{min-height:110px;font:12px monospace}
       <button class="cta" id="lGo">Sign in</button><div class="err" id="lErr" role="alert"></div>
     </div>
     <div id="pics">
-      <p class="hint">Save this month's calendar as a picture to post on Instagram.</p>
+      <p class="hint">Save this month's calendar as a picture to post on Instagram. On iPhone, tap "Save Image" in the menu that opens.</p>
       <button class="cta" data-pic="story">Save for Story</button>
       <button class="cta alt" data-pic="post">Save for Post</button>
       <button class="cta alt" data-pic="cal">Save full month picture</button>
@@ -150,6 +150,7 @@ const FIREBASE = {
 };
 /* ======================================== */
 
+if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
 const $=id=>document.getElementById(id), pad=n=>String(n).padStart(2,"0");
 const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const mf=(d,o)=>d.toLocaleDateString("en",o), MONTH={month:"long",year:"numeric"};
@@ -303,11 +304,17 @@ function calPic(){
   x.save();x.translate(px+pw2/2,pt+phh-95);x.rotate(-.05);x.textAlign="center";x.fillStyle=C2;x.font=`600 40px ${CV}`;x.fillText("First come,",0,0);x.fillText("first served!",0,42);x.restore();
   return c;
 }
+const FONTS=Promise.all(["700 80px Fredoka","600 40px Caveat","800 80px Unbounded","700 30px Figtree","italic 500 30px Figtree"].map(f=>document.fonts.load(f))).then(()=>document.fonts.ready).catch(()=>{});
 async function savePic(kind){
-  try{await Promise.all(["700 80px Fredoka","600 40px Caveat","800 80px Unbounded","700 30px Figtree","italic 500 30px Figtree"].map(f=>document.fonts.load(f)))}catch(e){}
-  await document.fonts.ready;
-  const c=kind==="cal"?calPic():poster(kind), a=document.createElement("a");
-  a.href=c.toDataURL("image/png"); a.download=`clean-nails-${kind}-${mf(view,MONTH).replace(" ","-")}.png`; a.click();
+  await FONTS;
+  const c=kind==="cal"?calPic():poster(kind), name=`clean-nails-${kind}-${mf(view,MONTH).replace(" ","-")}.png`;
+  const bin=atob(c.toDataURL("image/png").split(",")[1]), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  const file=new File([u],name,{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){            // phones: opens the share sheet, pick "Save Image"
+    try{await navigator.share({files:[file]});return}catch(e){if(e.name==="AbortError")return}
+  }
+  const url=URL.createObjectURL(file), a=document.createElement("a");     // computers: normal download
+  a.href=url; a.download=name; a.target="_blank"; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
 document.querySelectorAll("[data-pic]").forEach(b=>b.onclick=()=>savePic(b.dataset.pic));
 

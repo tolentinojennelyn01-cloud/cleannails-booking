@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#ffeaf3">
 <title>CLEAN NAILS by Cean Javier | Book an appointment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Figtree:ital,wght@0,400;0,500;0,700;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Figtree:ital,wght@0,400;0,500;0,700;1,500&family=Fredoka:wght@600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#fff;--mist:#ffeaf3;--ink:#26143a;--mint:#ff9fc8;--mint-d:#d6277f;--red:#8a7381;--line:#f2cadc;--mute:#86647a;
 --display:'Unbounded','Arial Black',sans-serif;--body:'Figtree','Helvetica Neue',Arial,sans-serif;color-scheme:light}
@@ -211,35 +211,100 @@ $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);drawCal()};
 $("next").onclick=()=>{view.setMonth(view.getMonth()+1);drawCal()};
 
 /* ---------- Save as picture (Story, Post, full month) ---------- */
-const PIC={
-  cal:{W:1400,cw:170,m:105,top:330,ty:160,ts:84,sub:44,nf:30,tf:23,f:26,foot:70,rh:()=>Math.max(150,100+Math.ceil(CONFIG.hours.length/2)*32)},
-  story:{W:1080,H:1920,cw:140,m:50,top:430,ty:230,ts:96,sub:40,nf:28,tf:21,f:24,foot:200,max:230},
-  post:{W:1080,H:1350,cw:140,m:50,top:310,ty:150,ts:80,sub:36,nf:28,tf:21,f:24,foot:60,max:200}
-};
-async function savePic(kind){
-  await document.fonts.ready;
-  const P=PIC[kind], n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(), first=new Date(view.getFullYear(),view.getMonth(),1).getDay(), rows=Math.ceil((first+n)/7);
-  const rh=P.rh?P.rh():Math.min(P.max,Math.floor((P.H-P.top-P.foot)/rows)), H=P.H||P.top+rows*rh+P.foot, W=P.W, cw=P.cw, m=P.m, top=P.top;
-  const c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d"), F="Figtree,Arial,sans-serif";
-  x.fillStyle="#ffeaf3"; x.fillRect(0,0,W,H); x.fillStyle="#ff9fc8"; x.fillRect(0,0,W,22);
-  x.textAlign="left"; x.fillStyle="#26143a"; x.font=`800 ${P.ts}px Unbounded,'Arial Black',sans-serif`; x.fillText(CONFIG.studio,m,P.ty);
-  x.fillStyle="#d6277f"; x.font=`italic 500 ${P.sub}px ${F}`; x.fillText("by "+CONFIG.owner+"  |  "+mf(view,MONTH),m,P.ty+70);
-  x.textAlign="center"; x.fillStyle="#86647a"; x.font=`700 ${P.f}px ${F}`;
+const INK="#26143a",HOT="#d6277f",BUB="#ff9fc8",SOFT="#ffd9e8",C2="#e5679a",F="Figtree,Arial,sans-serif",FR="Fredoka,'Arial Rounded MT Bold',Arial,sans-serif",CV="Caveat,'Comic Sans MS',cursive";
+const mkCanvas=(W,H)=>{const c=document.createElement("canvas");c.width=W;c.height=H;return [c,c.getContext("2d")]};
+function spark(x,cx,cy,r,col){x.fillStyle=col;x.beginPath();x.moveTo(cx,cy-r);x.quadraticCurveTo(cx,cy,cx+r,cy);x.quadraticCurveTo(cx,cy,cx,cy+r);x.quadraticCurveTo(cx,cy,cx-r,cy);x.quadraticCurveTo(cx,cy,cx,cy-r);x.fill()}
+function heart(x,cx,cy,z,col,line){x.beginPath();x.moveTo(cx,cy+z*.9);x.bezierCurveTo(cx-z*1.8,cy-z*.2,cx-z*.9,cy-z*1.4,cx,cy-z*.4);x.bezierCurveTo(cx+z*.9,cy-z*1.4,cx+z*1.8,cy-z*.2,cx,cy+z*.9);
+  if(line){x.strokeStyle=col;x.lineWidth=4;x.lineJoin="round";x.stroke()}else{x.fillStyle=col;x.fill()}}
+function rr(x,px,py,w,h,r,fill,stroke){x.beginPath();x.roundRect(px,py,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=3;x.stroke()}}
+function wrap(x,t,w){const out=[];let l="";t.split(" ").forEach(s=>{const n=l?l+" "+s:s;if(x.measureText(n).width>w&&l){out.push(l);l=s}else l=n});if(l)out.push(l);return out}
+function bubble(x,t,cx,y,size,rot,maxW){
+  x.save();x.textAlign="center";x.font=`700 ${size}px ${FR}`;const w=x.measureText(t).width;if(w>maxW){size*=maxW/w;x.font=`700 ${size}px ${FR}`}
+  x.translate(cx,y);x.rotate(rot);x.lineJoin="round";x.lineWidth=size*.13;x.strokeStyle="#ffc2dc";x.strokeText(t,5,9);x.strokeText(t,0,0);x.fillStyle=HOT;x.fillText(t,0,0);x.restore();return size}
+function card(x,dt,cx0,cy0,cw,hc,hrs,lh){
+  rr(x,cx0,cy0+24,cw,hc-24,34,"#fff7fb","#f2a9c6"); rr(x,cx0+cw*.07,cy0,cw*.86,56,28,"#ffb8d3");
+  const lab=mf(dt,{month:"long",day:"numeric"}); x.textAlign="center";x.fillStyle=INK;x.font=`600 ${cw<260?24:28}px ${FR}`;x.fillText(lab,cx0+cw/2-12,cy0+37);
+  heart(x,cx0+cw/2-12+x.measureText(lab).width/2+20,cy0+28,8,HOT);
+  hrs.forEach((h,i)=>{const y=cy0+94+i*lh,tk=bk(dt).includes(h);heart(x,cx0+cw*.17,y-8,9,tk?"#d9c3cd":BUB);
+    x.textAlign="left";x.font=`600 26px ${FR}`;x.fillStyle=tk?"#b79aa9":INK;x.fillText(h,cx0+cw*.27,y);if(tk)x.fillRect(cx0+cw*.27,y-9,x.measureText(h).width,3)});
+}
+function poster(kind){
+  const S=kind==="story",W=1080,H=S?1920:1350,[c,x]=mkCanvas(W,H);
+  const P=S?{m:50,my:215,mf:34,ts:175,t1:420,t2:575,sy:660,sf:28,ct:730,cb:1410,fx:70,fy:1480,fs:46,nx:400,ny:1445,nw:630,nh:130,nf:34,by:1610,bw:860,bh:100,bf:30}
+           :{m:50,my:92,mf:30,ts:140,t1:232,t2:366,sy:428,sf:24,ct:468,cb:1065,fx:60,fy:1112,fs:40,nx:360,ny:1085,nw:670,nh:112,nf:30,by:1225,bw:820,bh:86,bf:28};
+  const deco=S?[["h",95,170,30],["s",360,120,34],["h",W-100,150,22],["s",110,640,30],["h",190,600,26],["h",W-190,600,26],["s",W-110,640,32],["h",110,1800,34],["s",500,1850,22],["h",W-250,1840,24],["s",W-130,1810,30]]
+              :[["h",85,110,26],["s",330,70,28],["h",W-95,100,22],["s",110,355,26],["s",W-120,340,28],["h",W-215,372,22]];
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#ffe6f0");g.addColorStop(1,"#ffd2e4");x.fillStyle=g;x.fillRect(0,0,W,H);
+  deco.forEach(([t,px,py,s])=>t==="s"?spark(x,px,py,s,C2):heart(x,px,py,s,C2,true));
+  x.textAlign="center";x.fillStyle=INK;x.font=`500 ${P.mf}px ${F}`;x.letterSpacing="14px";x.fillText(mf(view,{month:"long"}).toUpperCase(),W/2+7,P.my);
+  const sz=bubble(x,"AVAILABLE",W/2,P.t1,P.ts,-.035,W-170); bubble(x,"SLOTS",W/2,P.t2,sz,.02,W-170);
+  x.font=`500 ${P.sf}px ${F}`;x.letterSpacing="6px";x.fillStyle=INK;const st="BOOK YOUR NAIL APPOINTMENT",sw=x.measureText(st).width;x.fillText(st,W/2-24,P.sy);x.letterSpacing="0px";
+  heart(x,W/2-24+sw/2+34,P.sy-9,9,HOT,true);
+  const ds=[],nd=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  for(let d=1;d<=nd;d++){const dt=new Date(view.getFullYear(),view.getMonth(),d);if(dt>=today&&dt<=last&&!offNote(dt)&&openSlots(dt).length)ds.push(dt)}
+  ds.length=Math.min(ds.length,S?12:8);
+  const hrs=CONFIG.hours,lh=42,hc=120+(hrs.length-1)*lh,gap=26,GW=W-2*P.m,n=ds.length;
+  if(n){
+    const cols=n<=2?n:n<=4?2:(n<=6||(S&&n<=9))?3:4,cw=Math.min(360,(GW-(cols-1)*gap)/cols),rows=Math.ceil(n/cols),gh=rows*hc+(rows-1)*gap,av=P.cb-P.ct,s=Math.min(1,av/gh),oy=P.ct+(av-gh*s)/2;
+    x.save();x.translate(W/2,oy);x.scale(s,s);x.translate(-GW/2,0);
+    ds.forEach((dt,i)=>{const r=Math.floor(i/cols),rc=Math.min(cols,n-r*cols),cx0=(GW-(rc*cw+(rc-1)*gap))/2+(i%cols)*(cw+gap);card(x,dt,cx0,r*(hc+gap),cw,hc,hrs,lh)});
+    x.restore();
+  }else{x.textAlign="center";x.fillStyle=HOT;x.font=`600 44px ${FR}`;x.fillText("No open slots right now",W/2,(P.ct+P.cb)/2);x.fillStyle=C2;x.font=`600 40px ${CV}`;x.fillText("Message "+CONFIG.owner.split(" ")[0]+" to ask for updates",W/2,(P.ct+P.cb)/2+56)}
+  x.save();x.translate(P.fx,P.fy);x.rotate(-.07);x.fillStyle=C2;x.strokeStyle=C2;x.lineWidth=4;x.textAlign="left";x.font=`600 ${P.fs}px ${CV}`;
+  x.fillText("First come,",0,0);x.fillText("first served!",16,P.fs*.95);x.beginPath();x.moveTo(0,P.fs*1.35);x.quadraticCurveTo(110,P.fs*1.15,240,P.fs*1.05);x.stroke();x.restore();
+  rr(x,P.nx,P.ny,P.nw,P.nh,38,SOFT);x.fillStyle=INK;x.textAlign="center";x.font=`600 ${P.nf}px ${CV}`;
+  const nl=wrap(x,"Appointments are 3 hours apart. Slots are confirmed once "+CONFIG.owner.split(" ")[0]+" replies.",P.nw-70);
+  nl.forEach((l,i)=>x.fillText(l,P.nx+P.nw/2,P.ny+P.nh/2+P.nf*.3-(nl.length-1)*P.nf*.55+i*P.nf*1.1));
+  rr(x,W/2-P.bw/2,P.by,P.bw,P.bh,P.bh/2,HOT);
+  const bt="Message "+CONFIG.owner.split(" ")[0]+" to reserve your preferred schedule.";x.font=`600 ${P.bf}px ${FR}`;x.textAlign="left";
+  const tw=x.measureText(bt).width,sx=W/2-(tw+64)/2,cy=P.by+P.bh/2;x.fillStyle="#fff";x.fillText(bt,sx+64,cy+P.bf*.35);
+  x.strokeStyle="#fff";x.lineWidth=3;x.lineJoin="round";x.beginPath();x.moveTo(sx,cy-4);x.lineTo(sx+40,cy-20);x.lineTo(sx+26,cy+20);x.lineTo(sx+17,cy+3);x.closePath();x.moveTo(sx+17,cy+3);x.lineTo(sx+40,cy-20);x.stroke();
+  return c;
+}
+function calPic(){
+  const first=new Date(view.getFullYear(),view.getMonth(),1).getDay(),n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(),rows=Math.ceil((first+n)/7);
+  const W=1400,cw=130,m=60,top=330,rh=Math.max(150,100+Math.ceil(CONFIG.hours.length/2)*32),H=top+rows*rh+70,[c,x]=mkCanvas(W,H);
+  x.fillStyle="#ffeaf3";x.fillRect(0,0,W,H);x.fillStyle=BUB;x.fillRect(0,0,W,22);
+  x.textAlign="left";let ts=84;const D=z=>`800 ${z}px Unbounded,'Arial Black',sans-serif`;
+  x.font=D(ts);const tw=x.measureText(CONFIG.studio).width,mw=W-2*m-170;if(tw>mw)ts*=mw/tw;x.font=D(ts);
+  const p1=CONFIG.studio.split(" "),w1=p1[0]+" ";
+  x.fillStyle=INK;x.fillText(w1,m,160);x.fillStyle=HOT;x.fillText(p1.slice(1).join(" "),m+x.measureText(w1).width,160);
+  spark(x,W-m-45,110,34,HOT);spark(x,W-m-88,80,17,BUB);spark(x,W-m-30,165,15,BUB);
+  const mt=mf(view,MONTH),ph=72,py=196,by="by "+CONFIG.owner;x.font=`700 44px ${F}`;
+  const pw=x.measureText(mt).width+56,base=py+ph/2+15;
+  rr(x,m,py,pw,ph,ph/2,HOT);x.fillStyle="#fff";x.fillText(mt,m+28,base);
+  x.fillStyle=INK;x.font=`italic 500 44px ${F}`;x.fillText(by,m+pw+26,base);heart(x,m+pw+26+x.measureText(by).width+30,py+ph/2,13,BUB);
+  x.textAlign="center";x.fillStyle="#86647a";x.font=`700 24px ${F}`;
   "SMTWTFS".split("").forEach((d,i)=>x.fillText(d,m+i*cw+cw/2,top-20));
   x.textAlign="left";
   for(let d=1;d<=n;d++){
-    const dt=new Date(view.getFullYear(),view.getMonth(),d), i=first+d-1, cx=m+(i%7)*cw, cy=top+Math.floor(i/7)*rh;
-    const gone=dt<today||dt>last, off=!gone&&(offNote(dt)||!openSlots(dt).length), b=bk(dt);
-    x.beginPath(); x.roundRect(cx+4,cy+4,cw-8,rh-8,12);
+    const dt=new Date(view.getFullYear(),view.getMonth(),d),i=first+d-1,cx=m+(i%7)*cw,cy=top+Math.floor(i/7)*rh;
+    const gone=dt<today||dt>last,off=!gone&&(offNote(dt)||!openSlots(dt).length),b=bk(dt);
+    x.beginPath();x.roundRect(cx+4,cy+4,cw-8,rh-8,12);
     if(gone){x.strokeStyle="#f2cadc";x.lineWidth=2;x.stroke()}
     else if(off){x.fillStyle="#f3d3e2";x.fill()}
-    else{x.fillStyle="#fff";x.fill();x.strokeStyle=b.length?"#d6277f":"#f2cadc";x.lineWidth=b.length?4:2;x.stroke()}
-    x.fillStyle=gone?"#c7a9b9":"#26143a"; x.font=`800 ${P.nf}px ${F}`; x.fillText(d,cx+cw*.1,cy+P.nf+14);
-    if(!gone&&!off)CONFIG.hours.forEach((h,k)=>{const t=shortT(h),tx=cx+cw*.1+(k%2)*cw*.39,ty=cy+Math.min(90,rh-62)+Math.floor(k/2)*30; x.font=`700 ${P.tf}px ${F}`;
+    else{x.fillStyle="#fff";x.fill();x.strokeStyle=b.length?HOT:"#f2cadc";x.lineWidth=b.length?4:2;x.stroke()}
+    x.fillStyle=gone?"#c7a9b9":INK;x.font=`800 28px ${F}`;x.fillText(d,cx+14,cy+42);
+    if(!gone&&!off)CONFIG.hours.forEach((h,k)=>{const t=shortT(h),tx=cx+14+(k%2)*51,ty=cy+Math.min(90,rh-62)+Math.floor(k/2)*30;x.font=`700 21px ${F}`;
       if(b.includes(h)){x.fillStyle="#8a7381";x.fillText(t,tx,ty);x.fillRect(tx,ty-8,x.measureText(t).width,3)}
-      else{x.fillStyle="#26143a";x.fillText(t,tx,ty)}});
+      else{x.fillStyle=INK;x.fillText(t,tx,ty)}});
   }
-  const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download=`clean-nails-${kind}-${mf(view,MONTH).replace(" ","-")}.png`; a.click();
+  const px=m+7*cw+40,pw2=W-m-px,pt=top-50,phh=rows*rh+50;
+  rr(x,px,pt,pw2,phh,28,"#fff","#f2a9c6");rr(x,px+24,pt+24,pw2-48,64,32,"#ffb8d3");
+  x.textAlign="center";x.fillStyle=INK;x.font=`600 30px ${FR}`;x.fillText("How to book",px+pw2/2-14,pt+66);heart(x,px+pw2/2-14+x.measureText("How to book").width/2+22,pt+56,8,HOT);
+  const steps=["Pick an open date. Appointments are 3 hours apart.","Message "+CONFIG.owner.split(" ")[0]+" on Instagram with your preferred date and time.","Your slot is confirmed once "+CONFIG.owner.split(" ")[0]+" replies."];
+  let yy=pt+150;x.font=`500 24px ${F}`;
+  steps.forEach((t,i)=>{const ls=wrap(x,t,pw2-110);x.textAlign="left";x.fillStyle=ls.length?INK:INK;
+    x.beginPath();x.arc(px+46,yy-8,20,0,7);x.fillStyle=HOT;x.fill();x.fillStyle="#fff";x.textAlign="center";x.font=`700 22px ${F}`;x.fillText(i+1,px+46,yy);
+    x.textAlign="left";x.fillStyle=INK;x.font=`500 24px ${F}`;ls.forEach((l,j)=>x.fillText(l,px+84,yy+j*32));yy+=ls.length*32+38});
+  x.save();x.translate(px+pw2/2,pt+phh-95);x.rotate(-.05);x.textAlign="center";x.fillStyle=C2;x.font=`600 40px ${CV}`;x.fillText("First come,",0,0);x.fillText("first served!",0,42);x.restore();
+  return c;
+}
+async function savePic(kind){
+  try{await Promise.all(["700 80px Fredoka","600 40px Caveat","800 80px Unbounded","700 30px Figtree","italic 500 30px Figtree"].map(f=>document.fonts.load(f)))}catch(e){}
+  await document.fonts.ready;
+  const c=kind==="cal"?calPic():poster(kind), a=document.createElement("a");
+  a.href=c.toDataURL("image/png"); a.download=`clean-nails-${kind}-${mf(view,MONTH).replace(" ","-")}.png`; a.click();
 }
 document.querySelectorAll("[data-pic]").forEach(b=>b.onclick=()=>savePic(b.dataset.pic));
 

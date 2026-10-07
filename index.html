@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffeaf3">
-<title>CLEAN NAILS by Cean Javier | Book an appointment</title>
+<title>CLEAN NAILS | Book an appointment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Figtree:ital,wght@0,400;0,500;0,700;1,500&family=Fredoka:wght@600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
@@ -80,7 +80,7 @@ textarea{min-height:110px;font:12px monospace}
 <div class="wrap">
   <header>
     <h1>CLEAN<span>NAILS</span></h1>
-    <p class="by">by <b>Cean Javier</b> &#9825; Pick a date to see open times.</p>
+    <p class="by">by <b>Ceant Javier</b> &#9825; Pick a date to see open times.</p>
   </header>
 
   <section id="cal-card">
@@ -98,7 +98,7 @@ textarea{min-height:110px;font:12px monospace}
     <h2 id="dTitle"></h2>
     <p class="msg" id="dMsg"></p>
     <div class="slots" id="slots"></div>
-    <a class="cta" id="dm" target="_blank" rel="noopener">Message Cean to book</a>
+    <a class="cta" id="dm" target="_blank" rel="noopener">Message CLEAN NAILS to book</a>
     <div class="edit" id="ownerBox" hidden>
       <label for="tIn">Add a time you're available</label>
       <div class="addrow"><input id="tIn" type="time"><button class="cta" id="tAdd">Add time</button></div>
@@ -109,7 +109,7 @@ textarea{min-height:110px;font:12px monospace}
   <section class="info">
     <h2>How to book</h2>
     <p>Open times change from day to day. Tap a date to see what is available.</p>
-    <p>Message Cean on Instagram with your preferred date and time. Your slot is confirmed once Cean replies.</p>
+    <p>Message CLEAN NAILS on Instagram with your preferred date and time. Your slot is confirmed once CLEAN NAILS replies.</p>
   </section>
 
   <section id="owner" hidden>
@@ -135,11 +135,11 @@ textarea{min-height:110px;font:12px monospace}
 /* ============ EDIT THIS PART ============ */
 const CONFIG = {
   studio: "CLEAN NAILS",
-  owner: "Cean Javier",
-  instagram: "cleannails",                            // Cean's Instagram username, no @
+  owner: "Ceant Javier",                               // shown in the header next to "by"
+  instagram: "cleannails",                            // CLEAN NAILS Instagram username, no @
   site: "https://tolentinojennelyn01-cloud.github.io/cleannails-booking/", // printed on the saved calendar picture
   daysAhead: 90,
-  slots: {}                                            // times are added by Cean from the ?owner view, nothing to edit here
+  slots: {}                                            // times are added from the ?owner view, nothing to edit here
 };
 /* Optional: your own Firebase web app config so every device sees changes live. Filled in for the clean-nails project. */
 const FIREBASE = {
@@ -188,7 +188,7 @@ function drawDay(){
   if(!date)return;
   const a=sl(date), edit=OWNER&&SIGNED;
   $("day").hidden=false; $("dTitle").textContent=mf(date,{weekday:"long",month:"long",day:"numeric"});
-  $("dMsg").textContent=a.length?(openSlots(date).length?"Open times are outlined. Message Cean with the one you want.":"Fully booked on this day. Try another date."):(edit?"No times yet. Add the times you are available below.":"No open times on this day.");
+  $("dMsg").textContent=a.length?(openSlots(date).length?"Open times are outlined. Message CLEAN NAILS with the one you want.":"Fully booked on this day. Try another date."):(edit?"No times yet. Add the times you are available below.":"No open times on this day.");
   const w=$("slots"); w.innerHTML="";
   a.forEach((t,i)=>{
     const el=document.createElement(edit?"button":"span"); el.className="slot"+(t.x?" x":""); el.textContent=t.t;
@@ -253,14 +253,14 @@ function poster(kind){
     x.save();x.translate(W/2,oy);x.scale(s,s);x.translate(-GW/2,0);
     ds.forEach((dt,i)=>{const r=Math.floor(i/cols),rc=Math.min(cols,n-r*cols),cx0=(GW-(rc*cw+(rc-1)*gap))/2+(i%cols)*(cw+gap);card(x,dt,cx0,r*(hc+gap),cw,hc,0,lh)});
     x.restore();
-  }else{x.textAlign="center";x.fillStyle=HOT;x.font=`600 44px ${FR}`;x.fillText("No open slots right now",W/2,(P.ct+P.cb)/2);x.fillStyle=C2;x.font=`600 40px ${CV}`;x.fillText("Message "+CONFIG.owner.split(" ")[0]+" to ask for updates",W/2,(P.ct+P.cb)/2+56)}
+  }else{x.textAlign="center";x.fillStyle=HOT;x.font=`600 44px ${FR}`;x.fillText("No open slots right now",W/2,(P.ct+P.cb)/2);x.fillStyle=C2;x.font=`600 40px ${CV}`;x.fillText("Message "+CONFIG.studio+" to ask for updates",W/2,(P.ct+P.cb)/2+56)}
   x.save();x.translate(P.fx,P.fy);x.rotate(-.07);x.fillStyle=C2;x.strokeStyle=C2;x.lineWidth=4;x.textAlign="left";x.font=`600 ${P.fs}px ${CV}`;
   x.fillText("First come,",0,0);x.fillText("first served!",16,P.fs*.95);x.beginPath();x.moveTo(0,P.fs*1.35);x.quadraticCurveTo(110,P.fs*1.15,240,P.fs*1.05);x.stroke();x.restore();
   rr(x,P.nx,P.ny,P.nw,P.nh,38,SOFT);x.fillStyle=INK;x.textAlign="center";x.font=`600 ${P.nf}px ${CV}`;
-  const nl=wrap(x,"Times change from day to day. Slots are confirmed once "+CONFIG.owner.split(" ")[0]+" replies.",P.nw-70);
+  const nl=wrap(x,"Times change from day to day. Slots are confirmed once "+CONFIG.studio+" replies.",P.nw-70);
   nl.forEach((l,i)=>x.fillText(l,P.nx+P.nw/2,P.ny+P.nh/2+P.nf*.3-(nl.length-1)*P.nf*.55+i*P.nf*1.1));
   rr(x,W/2-P.bw/2,P.by,P.bw,P.bh,P.bh/2,HOT);
-  const bt="Message "+CONFIG.owner.split(" ")[0]+" to reserve your preferred schedule.";x.font=`600 ${P.bf}px ${FR}`;x.textAlign="left";
+  const bt="Message "+CONFIG.studio+" to reserve your preferred schedule.";x.font=`600 ${P.bf}px ${FR}`;x.textAlign="left";
   const tw=x.measureText(bt).width,sx=W/2-(tw+64)/2,cy=P.by+P.bh/2;x.fillStyle="#fff";x.fillText(bt,sx+64,cy+P.bf*.35);
   x.strokeStyle="#fff";x.lineWidth=3;x.lineJoin="round";x.beginPath();x.moveTo(sx,cy-4);x.lineTo(sx+40,cy-20);x.lineTo(sx+26,cy+20);x.lineTo(sx+17,cy+3);x.closePath();x.moveTo(sx+17,cy+3);x.lineTo(sx+40,cy-20);x.stroke();
   return c;
@@ -296,7 +296,7 @@ function calPic(){
   const px=m+7*cw+40,pw2=W-m-px,pt=top-50,phh=rows*rh+50;
   rr(x,px,pt,pw2,phh,28,"#fff","#f2a9c6");rr(x,px+24,pt+24,pw2-48,64,32,"#ffb8d3");
   x.textAlign="center";x.fillStyle=INK;x.font=`600 30px ${FR}`;x.fillText("How to book",px+pw2/2-14,pt+66);heart(x,px+pw2/2-14+x.measureText("How to book").width/2+22,pt+56,8,HOT);
-  const steps=["Pick a date that has open times.","Message "+CONFIG.owner.split(" ")[0]+" on Instagram with your preferred date and time.","Your slot is confirmed once "+CONFIG.owner.split(" ")[0]+" replies."];
+  const steps=["Pick a date that has open times.","Message "+CONFIG.studio+" on Instagram with your preferred date and time.","Your slot is confirmed once "+CONFIG.studio+" replies."];
   let yy=pt+150;x.font=`500 24px ${F}`;
   steps.forEach((t,i)=>{const ls=wrap(x,t,pw2-110);x.textAlign="left";x.fillStyle=ls.length?INK:INK;
     x.beginPath();x.arc(px+46,yy-8,20,0,7);x.fillStyle=HOT;x.fill();x.fillStyle="#fff";x.textAlign="center";x.font=`700 22px ${F}`;x.fillText(i+1,px+46,yy);

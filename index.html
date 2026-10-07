@@ -34,6 +34,7 @@ section[hidden]{display:none}
 .dots{display:grid;grid-template-columns:repeat(4,5px);gap:3px}
 .dots i{width:5px;height:5px;border-radius:50%;background:var(--mint-d)}
 .dots i.x{background:transparent;box-shadow:inset 0 0 0 1.5px var(--red)}
+.day.none{background:transparent;border-style:dashed;color:#a58a9a;font-weight:500}
 .day.off{background:repeating-linear-gradient(135deg,var(--mist) 0 5px,#fff 5px 10px);color:var(--mute);font-weight:500}
 .day.full{background:#f4e6ec;color:var(--red)}
 .day.today{border-color:var(--mint-d);border-width:2px}
@@ -46,12 +47,17 @@ section[hidden]{display:none}
 .legend i.o{width:14px;height:14px;border-radius:3px;background:repeating-linear-gradient(135deg,var(--line) 0 2px,#fff 2px 4px);box-shadow:0 0 0 1px var(--line)}
 #dTitle{font-size:1.2rem;margin-bottom:6px}
 .msg{font-size:.96rem;margin-bottom:16px}.msg.off{background:var(--mist);border-left:4px solid var(--ink);padding:12px 14px;border-radius:0 8px 8px 0}
-.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:6px}
 .slot{all:unset;box-sizing:border-box;text-align:center;padding:12px 6px;border-radius:999px;border:2px solid var(--ink);font-weight:700;font-size:.95rem}
 button.slot{cursor:pointer;transition:background .15s}
 button.slot:hover{background:var(--mint)}
 .slot.x{border-color:var(--line);color:#a58a9a;text-decoration:line-through;background:var(--mist);font-weight:500}
 button.slot.x:hover{background:var(--mist);border-color:var(--ink)}
+.sw{display:flex;gap:6px}.sw .slot{flex:1;min-width:0}
+.rm{all:unset;cursor:pointer;width:42px;border-radius:999px;border:2px solid var(--line);display:grid;place-items:center;font-size:1.2rem;color:var(--mute)}
+.rm:hover{border-color:var(--ink);color:var(--ink)}
+.addrow{display:flex;gap:10px;align-items:stretch}.addrow input{flex:1;min-width:0}
+.addrow .cta{width:auto;margin:0;padding:0 20px;display:grid;place-items:center}
 .cta{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;text-align:center;margin-top:16px;padding:15px;border-radius:8px;background:var(--ink);color:#fff;font-weight:700;font-size:1rem;transition:background .15s,color .15s}
 .cta:hover{background:var(--mint);color:var(--ink)}
 .cta.alt{background:transparent;color:var(--ink);border:2px solid var(--ink);margin-top:10px}
@@ -84,7 +90,7 @@ textarea{min-height:110px;font:12px monospace}
       <button class="nav" id="next" aria-label="Next month">&rsaquo;</button>
     </div>
     <div class="grid" id="cal"></div>
-    <p class="legend"><span><i></i>Open time</span><span><i class="x"></i>Taken</span><span><i class="o"></i>Closed</span></p>
+    <p class="legend"><span><i></i>Open time</span><span><i class="x"></i>Taken</span></p>
   </section>
 
   <!-- Day details: clients see times, owner can edit (open the site with ?owner at the end of the address) -->
@@ -94,17 +100,15 @@ textarea{min-height:110px;font:12px monospace}
     <div class="slots" id="slots"></div>
     <a class="cta" id="dm" target="_blank" rel="noopener">Message Cean to book</a>
     <div class="edit" id="ownerBox" hidden>
-      <label for="eNote">Reason shown to clients (optional)</label>
-      <input id="eNote" placeholder="Out of town, day off, family event">
-      <button class="cta" id="eOff">Mark day as closed</button>
-      <button class="cta alt" id="eOn" hidden>Open this day again</button>
-      <p class="hint">Tap a time above to mark it taken. Tap again to undo.</p>
+      <label for="tIn">Add a time you're available</label>
+      <div class="addrow"><input id="tIn" type="time"><button class="cta" id="tAdd">Add time</button></div>
+      <p class="hint">Add as many times as you like for this date. Tap a time to cross it out when it's taken. Tap &times; to remove it.</p>
     </div>
   </section>
 
   <section class="info">
     <h2>How to book</h2>
-    <p>Appointments are 3 hours apart.</p>
+    <p>Open times change from day to day. Tap a date to see what is available.</p>
     <p>Message Cean on Instagram with your preferred date and time. Your slot is confirmed once Cean replies.</p>
   </section>
 
@@ -134,11 +138,8 @@ const CONFIG = {
   owner: "Cean Javier",
   instagram: "cleannails",                            // Cean's Instagram username, no @
   site: "https://tolentinojennelyn01-cloud.github.io/cleannails-booking/", // printed on the saved calendar picture
-  closedDays: [],                                      // weekly days off: 0 = Sunday ... 6 = Saturday
-  hours: ["8:00 AM","11:00 AM","2:00 PM","5:00 PM"],   // 3 hours apart; edit to change times
   daysAhead: 90,
-  offDays: {},                                         // saved in availability.json (set from the ?owner view)
-  booked: {}
+  slots: {}                                            // times are added by Cean from the ?owner view, nothing to edit here
 };
 /* Optional: your own Firebase web app config so every device sees changes live. Filled in for the clean-nails project. */
 const FIREBASE = {
@@ -157,10 +158,10 @@ const last=new Date(today); last.setDate(last.getDate()+CONFIG.daysAhead);
 let view=new Date(today.getFullYear(),today.getMonth(),1), date=null;
 const OWNER=new URLSearchParams(location.search).has("owner");
 const SYNC=!!FIREBASE.apiKey&&typeof firebase!=="undefined"; let DB=null,AUTH=null,SIGNED=!SYNC;
-const bk=dt=>CONFIG.booked[key(dt)]||[];
-const offNote=dt=>CONFIG.offDays[key(dt)]||(CONFIG.closedDays.includes(dt.getDay())?"Cean isn't taking bookings on this day.":null);
-const openSlots=dt=>CONFIG.hours.filter(h=>!bk(dt).includes(h));
-const shortT=h=>h.replace(/:00 ([AP])M/,"$1");
+const sl=dt=>CONFIG.slots[key(dt)]||[];
+const openSlots=dt=>sl(dt).filter(t=>!t.x);
+const shortT=h=>h.replace(":00","").replace(/ ([AP])M/,"$1");
+const mins=t=>{const [,h,m,ap]=t.match(/(\d+):(\d+) ([AP])M/);return (+h%12+(ap==="P"?12:0))*60+ +m};
 $("dm").href="https://ig.me/m/"+CONFIG.instagram;
 if(OWNER)$("owner").hidden=false;
 
@@ -174,39 +175,41 @@ function drawCal(){
   const n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
   for(let d=1;d<=n;d++){
     const dt=new Date(view.getFullYear(),view.getMonth(),d), b=document.createElement("button"), gone=dt<today||dt>last;
-    const off=offNote(dt), full=!off&&!openSlots(dt).length;
-    b.className="day"+(off?" off":full?" full":"")+(+dt===+today?" today":"")+(date&&+dt===+date?" sel":"");
-    b.disabled=gone; b.setAttribute("aria-label",dt.toDateString());
-    b.innerHTML=`<span>${d}</span>`+(gone||off?"":`<span class="dots">${CONFIG.hours.map(h=>`<i${bk(dt).includes(h)?' class="x"':''}></i>`).join("")}</span>`);
+    const A=sl(dt), edit=OWNER&&SIGNED, full=A.length&&!openSlots(dt).length;
+    b.className="day"+(!A.length?" none":full?" full":"")+(+dt===+today?" today":"")+(date&&+dt===+date?" sel":"");
+    b.disabled=gone||(!A.length&&!edit); b.setAttribute("aria-label",dt.toDateString());
+    b.innerHTML=`<span>${d}</span>`+(gone||!A.length?"":`<span class="dots">${A.map(t=>`<i${t.x?' class="x"':''}></i>`).join("")}</span>`);
     b.onclick=()=>{date=dt;drawCal();drawDay();$("day").scrollIntoView({behavior:"smooth",block:"nearest"})};
     g.append(b);
   }
 }
 function drawDay(){
   if(!date)return;
-  const k=key(date), off=offNote(date), isOff=CONFIG.offDays[k]!==undefined, edit=OWNER&&SIGNED;
+  const a=sl(date), edit=OWNER&&SIGNED;
   $("day").hidden=false; $("dTitle").textContent=mf(date,{weekday:"long",month:"long",day:"numeric"});
-  $("dMsg").textContent=off||(openSlots(date).length?"Open times are outlined. Message Cean with the one you want.":"Fully booked on this day. Try another date.");
-  $("dMsg").className="msg"+(off?" off":"");
+  $("dMsg").textContent=a.length?(openSlots(date).length?"Open times are outlined. Message Cean with the one you want.":"Fully booked on this day. Try another date."):(edit?"No times yet. Add the times you are available below.":"No open times on this day.");
   const w=$("slots"); w.innerHTML="";
-  if(!off||edit)CONFIG.hours.forEach(h=>{
-    const taken=bk(date).includes(h), b=document.createElement(edit?"button":"span");
-    b.className="slot"+(taken?" x":""); b.textContent=h;
-    if(edit){b.setAttribute("aria-pressed",taken);b.onclick=()=>{const a=CONFIG.booked[k]=CONFIG.booked[k]||[],i=a.indexOf(h);i<0?a.push(h):a.splice(i,1);saveEdit()}}
-    w.append(b)});
-  $("dm").hidden=edit||!!off||!openSlots(date).length;
+  a.forEach((t,i)=>{
+    const el=document.createElement(edit?"button":"span"); el.className="slot"+(t.x?" x":""); el.textContent=t.t;
+    if(!edit){w.append(el);return}
+    el.setAttribute("aria-pressed",!!t.x); el.onclick=()=>{t.x=t.x?0:1;saveEdit()};
+    const rm=document.createElement("button"); rm.className="rm"; rm.innerHTML="&times;"; rm.setAttribute("aria-label","Remove "+t.t); rm.onclick=()=>{a.splice(i,1);saveEdit()};
+    const row=document.createElement("div"); row.className="sw"; row.append(el,rm); w.append(row)});
+  $("dm").hidden=edit||!openSlots(date).length;
   $("ownerBox").hidden=!edit;
-  $("eNote").value=isOff?CONFIG.offDays[k]:""; $("eOff").textContent=isOff?"Update note":"Mark day as closed"; $("eOn").hidden=!isOff;
 }
 function saveEdit(){
-  Object.keys(CONFIG.booked).forEach(k=>{if(!CONFIG.booked[k].length)delete CONFIG.booked[k]});
-  const data={offDays:CONFIG.offDays,booked:CONFIG.booked};
+  Object.keys(CONFIG.slots).forEach(k=>{if(!CONFIG.slots[k].length)delete CONFIG.slots[k]});
+  const data={slots:CONFIG.slots};
   if(SYNC)DB.collection("schedule").doc("main").set(data).catch(()=>alert("Could not save. Please sign in again."));
-  else try{localStorage.setItem("cn-schedule",JSON.stringify(data))}catch(e){}
+  else try{localStorage.setItem("cn-slots",JSON.stringify(data))}catch(e){}
   drawCal(); drawDay();
 }
-$("eOff").onclick=()=>{CONFIG.offDays[key(date)]=$("eNote").value.trim()||"Cean isn't available on this day.";saveEdit()};
-$("eOn").onclick=()=>{delete CONFIG.offDays[key(date)];saveEdit()};
+$("tAdd").onclick=()=>{
+  const v=$("tIn").value; if(!v||!date)return;
+  const [h,m]=v.split(":").map(Number), t=`${h%12||12}:${pad(m)} ${h>=12?"PM":"AM"}`, k=key(date), a=CONFIG.slots[k]=CONFIG.slots[k]||[];
+  if(!a.some(o=>o.t===t))a.push({t,x:0}); a.sort((p,q)=>mins(p.t)-mins(q.t)); $("tIn").value=""; saveEdit();
+};
 $("prev").onclick=()=>{view.setMonth(view.getMonth()-1);drawCal()};
 $("next").onclick=()=>{view.setMonth(view.getMonth()+1);drawCal()};
 
@@ -225,7 +228,7 @@ function card(x,dt,cx0,cy0,cw,hc,hrs,lh){
   rr(x,cx0,cy0+24,cw,hc-24,34,"#fff7fb","#f2a9c6"); rr(x,cx0+cw*.07,cy0,cw*.86,56,28,"#ffb8d3");
   const lab=mf(dt,{month:"long",day:"numeric"}); x.textAlign="center";x.fillStyle=INK;x.font=`600 ${cw<260?24:28}px ${FR}`;x.fillText(lab,cx0+cw/2-12,cy0+37);
   heart(x,cx0+cw/2-12+x.measureText(lab).width/2+20,cy0+28,8,HOT);
-  hrs.forEach((h,i)=>{const y=cy0+94+i*lh,tk=bk(dt).includes(h);heart(x,cx0+cw*.17,y-8,9,tk?"#d9c3cd":BUB);
+  sl(dt).forEach((s,i)=>{const h=s.t,y=cy0+94+i*lh,tk=!!s.x;heart(x,cx0+cw*.17,y-8,9,tk?"#d9c3cd":BUB);
     x.textAlign="left";x.font=`600 26px ${FR}`;x.fillStyle=tk?"#b79aa9":INK;x.fillText(h,cx0+cw*.27,y);if(tk)x.fillRect(cx0+cw*.27,y-9,x.measureText(h).width,3)});
 }
 function poster(kind){
@@ -241,19 +244,19 @@ function poster(kind){
   x.font=`500 ${P.sf}px ${F}`;x.letterSpacing="6px";x.fillStyle=INK;const st="BOOK YOUR NAIL APPOINTMENT",sw=x.measureText(st).width;x.fillText(st,W/2-24,P.sy);x.letterSpacing="0px";
   heart(x,W/2-24+sw/2+34,P.sy-9,9,HOT,true);
   const ds=[],nd=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
-  for(let d=1;d<=nd;d++){const dt=new Date(view.getFullYear(),view.getMonth(),d);if(dt>=today&&dt<=last&&!offNote(dt)&&openSlots(dt).length)ds.push(dt)}
+  for(let d=1;d<=nd;d++){const dt=new Date(view.getFullYear(),view.getMonth(),d);if(dt>=today&&dt<=last&&openSlots(dt).length)ds.push(dt)}
   ds.length=Math.min(ds.length,S?12:8);
-  const hrs=CONFIG.hours,lh=42,hc=120+(hrs.length-1)*lh,gap=26,GW=W-2*P.m,n=ds.length;
+  const lh=42,hc=120+(Math.max(1,...ds.map(d=>sl(d).length))-1)*lh,gap=26,GW=W-2*P.m,n=ds.length;
   if(n){
     const cols=n<=2?n:n<=4?2:(n<=6||(S&&n<=9))?3:4,cw=Math.min(360,(GW-(cols-1)*gap)/cols),rows=Math.ceil(n/cols),gh=rows*hc+(rows-1)*gap,av=P.cb-P.ct,s=Math.min(1,av/gh),oy=P.ct+(av-gh*s)/2;
     x.save();x.translate(W/2,oy);x.scale(s,s);x.translate(-GW/2,0);
-    ds.forEach((dt,i)=>{const r=Math.floor(i/cols),rc=Math.min(cols,n-r*cols),cx0=(GW-(rc*cw+(rc-1)*gap))/2+(i%cols)*(cw+gap);card(x,dt,cx0,r*(hc+gap),cw,hc,hrs,lh)});
+    ds.forEach((dt,i)=>{const r=Math.floor(i/cols),rc=Math.min(cols,n-r*cols),cx0=(GW-(rc*cw+(rc-1)*gap))/2+(i%cols)*(cw+gap);card(x,dt,cx0,r*(hc+gap),cw,hc,0,lh)});
     x.restore();
   }else{x.textAlign="center";x.fillStyle=HOT;x.font=`600 44px ${FR}`;x.fillText("No open slots right now",W/2,(P.ct+P.cb)/2);x.fillStyle=C2;x.font=`600 40px ${CV}`;x.fillText("Message "+CONFIG.owner.split(" ")[0]+" to ask for updates",W/2,(P.ct+P.cb)/2+56)}
   x.save();x.translate(P.fx,P.fy);x.rotate(-.07);x.fillStyle=C2;x.strokeStyle=C2;x.lineWidth=4;x.textAlign="left";x.font=`600 ${P.fs}px ${CV}`;
   x.fillText("First come,",0,0);x.fillText("first served!",16,P.fs*.95);x.beginPath();x.moveTo(0,P.fs*1.35);x.quadraticCurveTo(110,P.fs*1.15,240,P.fs*1.05);x.stroke();x.restore();
   rr(x,P.nx,P.ny,P.nw,P.nh,38,SOFT);x.fillStyle=INK;x.textAlign="center";x.font=`600 ${P.nf}px ${CV}`;
-  const nl=wrap(x,"Appointments are 3 hours apart. Slots are confirmed once "+CONFIG.owner.split(" ")[0]+" replies.",P.nw-70);
+  const nl=wrap(x,"Times change from day to day. Slots are confirmed once "+CONFIG.owner.split(" ")[0]+" replies.",P.nw-70);
   nl.forEach((l,i)=>x.fillText(l,P.nx+P.nw/2,P.ny+P.nh/2+P.nf*.3-(nl.length-1)*P.nf*.55+i*P.nf*1.1));
   rr(x,W/2-P.bw/2,P.by,P.bw,P.bh,P.bh/2,HOT);
   const bt="Message "+CONFIG.owner.split(" ")[0]+" to reserve your preferred schedule.";x.font=`600 ${P.bf}px ${FR}`;x.textAlign="left";
@@ -263,7 +266,7 @@ function poster(kind){
 }
 function calPic(){
   const first=new Date(view.getFullYear(),view.getMonth(),1).getDay(),n=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(),rows=Math.ceil((first+n)/7);
-  const W=1400,cw=130,m=60,top=330,rh=Math.max(150,100+Math.ceil(CONFIG.hours.length/2)*32),H=top+rows*rh+70,[c,x]=mkCanvas(W,H);
+  const W=1400,cw=130,m=60,top=330,rh=164,H=top+rows*rh+70,[c,x]=mkCanvas(W,H);
   x.fillStyle="#ffeaf3";x.fillRect(0,0,W,H);x.fillStyle=BUB;x.fillRect(0,0,W,22);
   x.textAlign="left";let ts=84;const D=z=>`800 ${z}px Unbounded,'Arial Black',sans-serif`;
   x.font=D(ts);const tw=x.measureText(CONFIG.studio).width,mw=W-2*m-170;if(tw>mw)ts*=mw/tw;x.font=D(ts);
@@ -279,20 +282,20 @@ function calPic(){
   x.textAlign="left";
   for(let d=1;d<=n;d++){
     const dt=new Date(view.getFullYear(),view.getMonth(),d),i=first+d-1,cx=m+(i%7)*cw,cy=top+Math.floor(i/7)*rh;
-    const gone=dt<today||dt>last,off=!gone&&(offNote(dt)||!openSlots(dt).length),b=bk(dt);
+    const A=sl(dt),gone=dt<today||dt>last,off=!gone&&A.length>0&&!openSlots(dt).length,none=!gone&&!A.length;
     x.beginPath();x.roundRect(cx+4,cy+4,cw-8,rh-8,12);
-    if(gone){x.strokeStyle="#f2cadc";x.lineWidth=2;x.stroke()}
+    if(gone||none){x.strokeStyle="#f2cadc";x.lineWidth=2;x.stroke()}
     else if(off){x.fillStyle="#f3d3e2";x.fill()}
-    else{x.fillStyle="#fff";x.fill();x.strokeStyle=b.length?HOT:"#f2cadc";x.lineWidth=b.length?4:2;x.stroke()}
-    x.fillStyle=gone?"#c7a9b9":INK;x.font=`800 28px ${F}`;x.fillText(d,cx+14,cy+42);
-    if(!gone&&!off)CONFIG.hours.forEach((h,k)=>{const t=shortT(h),tx=cx+14+(k%2)*51,ty=cy+Math.min(90,rh-62)+Math.floor(k/2)*30;x.font=`700 21px ${F}`;
-      if(b.includes(h)){x.fillStyle="#8a7381";x.fillText(t,tx,ty);x.fillRect(tx,ty-8,x.measureText(t).width,3)}
+    else{x.fillStyle="#fff";x.fill();x.strokeStyle="#f2a9c6";x.lineWidth=3;x.stroke()}
+    x.fillStyle=gone||none?"#c7a9b9":INK;x.font=`800 28px ${F}`;x.fillText(d,cx+14,cy+42);
+    if(!gone&&!none)A.slice(0,6).forEach((o,k)=>{const t=shortT(o.t),tx=cx+12+(k%2)*58,ty=cy+80+Math.floor(k/2)*28;x.font=`700 19px ${F}`;
+      if(o.x){x.fillStyle="#8a7381";x.fillText(t,tx,ty);x.fillRect(tx,ty-8,x.measureText(t).width,3)}
       else{x.fillStyle=INK;x.fillText(t,tx,ty)}});
   }
   const px=m+7*cw+40,pw2=W-m-px,pt=top-50,phh=rows*rh+50;
   rr(x,px,pt,pw2,phh,28,"#fff","#f2a9c6");rr(x,px+24,pt+24,pw2-48,64,32,"#ffb8d3");
   x.textAlign="center";x.fillStyle=INK;x.font=`600 30px ${FR}`;x.fillText("How to book",px+pw2/2-14,pt+66);heart(x,px+pw2/2-14+x.measureText("How to book").width/2+22,pt+56,8,HOT);
-  const steps=["Pick an open date. Appointments are 3 hours apart.","Message "+CONFIG.owner.split(" ")[0]+" on Instagram with your preferred date and time.","Your slot is confirmed once "+CONFIG.owner.split(" ")[0]+" replies."];
+  const steps=["Pick a date that has open times.","Message "+CONFIG.owner.split(" ")[0]+" on Instagram with your preferred date and time.","Your slot is confirmed once "+CONFIG.owner.split(" ")[0]+" replies."];
   let yy=pt+150;x.font=`500 24px ${F}`;
   steps.forEach((t,i)=>{const ls=wrap(x,t,pw2-110);x.textAlign="left";x.fillStyle=ls.length?INK:INK;
     x.beginPath();x.arc(px+46,yy-8,20,0,7);x.fillStyle=HOT;x.fill();x.fillStyle="#fff";x.textAlign="center";x.font=`700 22px ${F}`;x.fillText(i+1,px+46,yy);
@@ -310,14 +313,14 @@ document.querySelectorAll("[data-pic]").forEach(b=>b.onclick=()=>savePic(b.datas
 
 /* ---------- Load schedule ---------- */
 function loadLocal(){
-  let saved=null; try{saved=JSON.parse(localStorage.getItem("cn-schedule"))}catch(e){}
-  (saved?Promise.resolve(saved):fetch("availability.json?"+Date.now()).then(r=>r.json())).then(d=>{CONFIG.offDays=d.offDays||{};CONFIG.booked=d.booked||{}})
+  let saved=null; try{saved=JSON.parse(localStorage.getItem("cn-slots"))}catch(e){}
+  (saved?Promise.resolve(saved):fetch("availability.json?"+Date.now()).then(r=>r.json())).then(d=>{CONFIG.slots=d.slots||{}})
     .catch(()=>{}).finally(()=>drawCal());
 }
 if(SYNC){
   firebase.initializeApp(FIREBASE); DB=firebase.firestore(); AUTH=firebase.auth();
-  DB.collection("schedule").doc("main").onSnapshot(s=>{const d=s.exists?s.data():{};CONFIG.offDays=d.offDays||{};CONFIG.booked=d.booked||{};drawCal();drawDay()},()=>drawCal());
-  AUTH.onAuthStateChanged(u=>{SIGNED=!!u;$("login").hidden=SIGNED||!OWNER;drawDay()});
+  DB.collection("schedule").doc("main").onSnapshot(s=>{const d=s.exists?s.data():{};CONFIG.slots=d.slots||{};drawCal();drawDay()},()=>drawCal());
+  AUTH.onAuthStateChanged(u=>{SIGNED=!!u;$("login").hidden=SIGNED||!OWNER;drawCal();drawDay()});
   $("lGo").onclick=()=>{$("lErr").textContent="";AUTH.signInWithEmailAndPassword($("lEmail").value.trim(),$("lPass").value).catch(()=>{$("lErr").textContent="Wrong email or password."})};
   drawCal();
 }else loadLocal();
